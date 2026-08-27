@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>CreditosApi</RootNamespace>
+    <UserSecretsId>b6d8a3d0-8a3a-4b1d-9c2a-creditos-api</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- ORM para hablar con PostgreSQL. Se usa un rango "8.0.*" (última versión estable
+         compatible con EF Core 8) para no depender de un número de parche exacto. -->
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.*">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <!-- Documentación interactiva de la API (OpenAPI / Swagger) -->
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.*" />
+    <!-- Autenticación con JWT (login + protección de endpoints) -->
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.*" />
+    <!-- Hash de la contraseña de login (BCrypt): nunca se guarda ni se compara en texto plano -->
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.*" />
+  </ItemGroup>
+
+</Project>
