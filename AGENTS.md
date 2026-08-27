@@ -4,7 +4,7 @@ Este archivo sigue la convención [AGENTS.md](https://agents.md) para que cualqu
 
 ## Qué es este proyecto
 
-Backend de una app de registro y consulta de créditos. Al crear un crédito (`POST /api/creditos`) se guarda en PostgreSQL y se encola el envío de un correo de notificación a `creditos@gmail.com`, que se envía **en segundo plano**, de forma asíncrona, sin bloquear la respuesta HTTP. Todos los endpoints de créditos requieren autenticación (JWT); el token se obtiene en `POST /api/auth/login`.
+Backend de una app de registro y consulta de créditos. Al crear un crédito (`POST /api/creditos`) se guarda en PostgreSQL y se encola el envío de un correo de notificación a `fyasocialcapital@gmail.com`, que se envía **en segundo plano**, de forma asíncrona, sin bloquear la respuesta HTTP. Todos los endpoints de créditos requieren autenticación (JWT); el token se obtiene en `POST /api/auth/login`.
 
 Stack: **.NET 8 / ASP.NET Core Web API / Entity Framework Core / Npgsql (PostgreSQL) / JWT (Microsoft.AspNetCore.Authentication.JwtBearer)**.
 
@@ -49,6 +49,6 @@ No hay una suite de pruebas automatizadas todavía. Si agregas una (recomendado:
 ## Contexto de negocio (del requerimiento original)
 
 - El formulario de registro pide: nombre del cliente, cédula/ID, valor del crédito, tasa de interés, plazo en meses y el comercial que lo registra.
-- Al registrar, se debe notificar por correo a `creditos@gmail.com` con nombre del cliente, valor del crédito, nombre del comercial y fecha de registro — en segundo plano.
+- Al registrar, se debe notificar por correo a `fyasocialcapital@gmail.com` con nombre del cliente, valor del crédito, nombre del comercial y fecha de registro — en segundo plano.
 - La consulta de créditos debe permitir filtrar por cliente, ID o comercial, y ordenar por fecha o valor.
 - El registro y la consulta deben quedar protegidos (requisito de seguridad opcional del documento original: "uso de JWT o sesiones").

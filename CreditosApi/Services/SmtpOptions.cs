@@ -16,5 +16,5 @@ public class SmtpOptions
     public string FromAddress { get; set; } = string.Empty;
     public string FromName { get; set; } = "App Creditos";
     public bool EnableSsl { get; set; } = true;
-    public string DestinatarioCreditos { get; set; } = "creditos@gmail.com";
+    public string DestinatarioCreditos { get; set; } = "fyasocialcapital@gmail.com";
 }

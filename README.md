@@ -1,6 +1,6 @@
 # Creditos API (Backend)
 
-API REST en **.NET 8 (ASP.NET Core Web API) + Entity Framework Core + PostgreSQL** para registrar y consultar créditos. Al registrar un crédito, se encola automáticamente el envío de un correo de notificación a `creditos@gmail.com`, que se envía en segundo plano (no bloquea la respuesta al usuario).
+API REST en **.NET 8 (ASP.NET Core Web API) + Entity Framework Core + PostgreSQL** para registrar y consultar créditos. Al registrar un crédito, se encola automáticamente el envío de un correo de notificación a `fyasocialcapital@gmail.com`, que se envía en segundo plano (no bloquea la respuesta al usuario).
 
 ## Requisitos previos
 
@@ -36,7 +36,7 @@ psql -U creditos_app -d creditosdb -f db/seed_ejemplo.sql
   "User": "tu_correo@gmail.com",
   "Password": "TU_APP_PASSWORD",
   "FromAddress": "tu_correo@gmail.com",
-  "DestinatarioCreditos": "creditos@gmail.com"
+  "DestinatarioCreditos": "fyasocialcapital@gmail.com"
 },
 "Jwt": {
   "Issuer": "CreditosApi",
@@ -156,6 +156,113 @@ Implementado:
 Pendiente / sugerido como siguiente paso:
 - HTTPS obligatorio en producción con certificado válido (en local se usa `dotnet dev-certs`).
 - Si el equipo crece: tabla de usuarios individuales en vez del usuario único compartido.
+
+## 8. Despliegue en un servidor Linux
+
+Referencia de cómo queda montado en producción (Ubuntu 24.04). No hace falta Docker: la API corre como servicio de systemd y Nginx la publica.
+
+### Instalar lo necesario
+
+```bash
+sudo apt update
+sudo apt install -y aspnetcore-runtime-8.0 postgresql nginx
+# Para compilar en el mismo servidor, además: sudo apt install -y dotnet-sdk-8.0
+```
+
+### Publicar la aplicación
+
+```bash
+cd CreditosApi
+dotnet publish -c Release -o ~/creditos-api
+```
+
+Los secretos **no** van en `appsettings.json`. En el servidor se usa un `appsettings.Local.json` junto al publicado (no versionado) o variables de entorno en el propio servicio.
+
+### Servicio systemd
+
+`/etc/systemd/system/creditos-api.service`:
+
+```ini
+[Unit]
+Description=Creditos API
+After=network.target postgresql.service
+
+[Service]
+WorkingDirectory=/home/USUARIO/creditos-api
+ExecStart=/usr/bin/dotnet /home/USUARIO/creditos-api/CreditosApi.dll
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=ASPNETCORE_URLS=http://localhost:5080
+Restart=always
+RestartSec=5
+User=USUARIO
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now creditos-api
+sudo systemctl status creditos-api      # debe decir "active (running)"
+sudo journalctl -u creditos-api -f      # logs en vivo
+```
+
+La API queda escuchando solo en `localhost:5080`: no se expone directamente a internet, Nginx es quien recibe las peticiones.
+
+### Nginx
+
+Un solo `server` publica el frontend estático y hace de proxy hacia la API:
+
+```nginx
+server {
+    listen 80;
+    server_name TU_DOMINIO;
+
+    root /var/www/creditos-frontend;   # salida de "npm run build" del frontend
+    index index.html;
+
+    location /api/ {
+        proxy_pass http://localhost:5080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+### HTTPS
+
+```bash
+sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d TU_DOMINIO
+```
+
+HTTPS no es opcional en la práctica: Android bloquea por defecto las conexiones sin cifrar, así que la app móvil no puede hablar con un backend en HTTP plano.
+
+### CORS
+
+`Cors:AllowedOrigins` debe incluir todos los orígenes desde los que se llama a la API. Para la app de Capacitor hay que agregar además su origen interno, que no es el dominio del sitio:
+
+```json
+"Cors": {
+  "AllowedOrigins": [
+    "https://TU_DOMINIO",
+    "https://localhost",
+    "capacitor://localhost"
+  ]
+}
+```
+
+Sin `https://localhost` la app instalada recibe "Failed to fetch" aunque el backend esté funcionando: la petición sale bien y es el navegador interno el que descarta la respuesta.
+
+### Puertos
+
+En un proveedor de nube hay que abrir además los puertos en el firewall del panel (grupo de seguridad de Azure, AWS, etc.): 80 y 443 de entrada. El 5080 y el 5432 se quedan cerrados a propósito — solo se accede a ellos desde el propio servidor.
 
 ## Estructura del proyecto
 
