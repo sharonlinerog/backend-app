@@ -22,7 +22,7 @@ public class CreditoCreateDto
     // la sobrecarga [Range(int, int)] convertiría el decimal a int antes de comparar
     // (redondeando), y dejaría pasar valores de borde como una tasa de 100.49.
     [Required(ErrorMessage = "El valor del crédito es obligatorio")]
-    [Range(typeof(decimal), "1", "1000000000", ErrorMessage = "El valor del crédito debe ser mayor a 0")]
+    [Range(typeof(decimal), "1", "1000000000", ErrorMessage = "El valor del crédito debe estar entre 1 y 1.000.000.000")]
     public decimal ValorCredito { get; set; }
 
     [Required(ErrorMessage = "La tasa de interés es obligatoria")]
